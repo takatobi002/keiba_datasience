@@ -108,7 +108,6 @@ if __name__ == "__main__":
             with open(CSV_FOLDER + str(year) + ".csv", 'a+') as f:
                 writer = csv.writer(f)
                 writer.writerow(data)
-
             print(data)
  
             # 間隔を設ける(秒単位）

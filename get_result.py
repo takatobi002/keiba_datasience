@@ -11,7 +11,7 @@ from selenium.webdriver.common.by import By
  
  
 # ドライバーのフルパス
-# CHROMEDRIVER = "chromedriver.exeのパス"
+CHROMEDRIVER = "/home/inaho/Documents/chromedriver_linux64/chromedriver"
 
 # 改ページ（最大）
 PAGE_MAX = 1
@@ -31,7 +31,7 @@ def get_driver():
     options.add_argument('--headless')
  
     # ブラウザーを起動
-    driver = webdriver.Chrome(options=options)
+    driver = webdriver.Chrome(CHROMEDRIVER, options=options)
  
     return driver
 
@@ -79,10 +79,8 @@ def get_data_from_source(src):
  
         return info
  
-    except Exception as e:
- 
+    except Exception:
         print("Exception\n" + traceback.format_exc())
- 
         return None
 
 # レース情報の抽出
@@ -268,7 +266,6 @@ def get_payout(soup):
 def get_rap_pace(soup):
  
     result = []
- 
     row_list = []
  
     elem_base = soup.find(class_="Race_HaronTime")
@@ -291,14 +288,14 @@ def get_rap_pace(soup):
             row_list.append(col_list)
  
             counter = counter + 1
- 
-    for i in range(len(row_list[0])):
-        tmp = {}
-        tmp["header"] = row_list[0][i]
-        tmp["haron_time_1"] = row_list[1][i]
-        tmp["haron_time_2"] = row_list[2][i]
- 
-        result.append(tmp)
+
+        for i in range(len(row_list[0])):
+            tmp = {}
+            tmp["header"] = row_list[0][i]
+            tmp["haron_time_1"] = row_list[1][i]
+            tmp["haron_time_2"] = row_list[2][i]
+    
+            result.append(tmp)
  
     return result
 
@@ -343,7 +340,9 @@ if __name__ == "__main__":
     page_counter = 0
  
     for day_race_id in list_id:
+        print(day_race_id)
         for race_id in day_race_id:
+            print(race_id)
             # 対象ページURL
             page = "https://race.netkeiba.com/race/result.html?race_id=" + str(race_id)
 
@@ -354,11 +353,17 @@ if __name__ == "__main__":
             data = get_data_from_source(source)
 
             # データ保存
-            print(data)
+            with open(RIGHT_FOLDER + str(YEAR) + ".csv", 'a+') as f:
+                writer = csv.writer(f)
+                write_race = []
+                for k,v in data.items():
+                    # for i in range(4):
+                    write_race.append([k,v])
+                writer.writerow(write_race)
+            # print(write_race)
 
             # 間隔を設ける(秒単位）
             time.sleep(INTERVAL_TIME)
- 
  
     # 閉じる
     driver.quit()
