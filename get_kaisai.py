@@ -15,7 +15,8 @@ PAGE_MAX = 120
 INTERVAL_TIME = 3
 
 # 対象年度
-YEAR =[i for i in range(2011, 2021)]
+# YEAR =[i for i in range(2011, 2021)]
+YEAR = [2021]
 print(YEAR)
 
 # CSV保存先
@@ -44,11 +45,9 @@ def get_source_from_page(driver, page):
         page_source = driver.page_source
  
         return page_source
-        
-    except Exception as e:
- 
+
+    except Exception:
         print("Exception\n" + traceback.format_exc())
- 
         return None
  
  
@@ -77,10 +76,8 @@ def get_data_from_source(src):
  
         return info
  
-    except Exception as e:
- 
+    except Exception:
         print("Exception\n" + traceback.format_exc())
- 
         return None
  
  

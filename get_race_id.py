@@ -9,18 +9,18 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
- 
-# ドライバーのフルパス
-# CHROMEDRIVER = "chromedriver.exeのパス"
 
 # 改ページ（最大）
-PAGE_MAX = 1
+# PAGE_MAX = 1
 # 遷移間隔（秒）
 INTERVAL_TIME = 3
  
 # 年度
-YEAR = "2008"
- 
+YEAR = "2021"
+# 生成するCSVの場所
+CSV_FOLDER = "data/race_id/"
+
+
 # ドライバー準備
 def get_driver():
     # ヘッドレスモードでブラウザを起動
@@ -40,10 +40,10 @@ def get_source_from_page(driver, page):
         # id="RaceTopRace"の要素が見つかるまで10秒は待つ
         WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, 'RaceTopRace')))
         page_source = driver.page_source
-        print(page_source)
+        # print(page_source)
         return page_source
  
-    except Exception as e:
+    except Exception:
         print("Exception\n" + traceback.format_exc())
         return None
  
@@ -59,26 +59,28 @@ def get_data_from_source(src):
  
         if elem_base:
             elems = elem_base.find_all("li", class_="RaceList_DataItem")
+            # print(elems[0])
  
             for elem in elems:
                 # 最初のaタグ
                 a_tag = elem.find("a")
+                # print(a_tag)
  
                 if a_tag:
                     href = a_tag.attrs['href']
-                    match = re.findall("../race/result.html?race_id=(.*)&amp;rf=race_list", href)
+                    print("hrefだよ：" + href)
+                    match = re.findall("[0-9]{12}", href)
+                    # print(match)
  
                     if len(match) > 0:
                         item_id = match[0]
-                        print(item_id)
+                        # print(item_id)
                         info.append(item_id)
  
         return info
  
-    except Exception as e:
- 
+    except Exception:
         print("Exception\n" + traceback.format_exc())
- 
         return None
  
 # kaisai_dateリストを取得する
@@ -108,13 +110,11 @@ if __name__ == "__main__":
         for kaisai_date in month:
             print(kaisai_date)
 
-            page_counter = page_counter + 1
+            # page_counter =+ 1
     
             # 対象ページURL
-            # page = "https://race.netkeiba.com/top/race_list.html?kaisai_date=" + str(kaisai_date)
             page = "https://race.netkeiba.com/top/race_list_sub.html?kaisai_date=" + str(kaisai_date)
 
-    
             # ページのソース取得
             source = get_source_from_page(driver, page)
     
@@ -122,17 +122,20 @@ if __name__ == "__main__":
             data = get_data_from_source(source)
     
             # データ保存
+            with open(CSV_FOLDER + str(YEAR) + ".csv", 'a+') as f:
+                writer = csv.writer(f)
+                writer.writerow(data)
             print(data)
-    
+
             # 間隔を設ける(秒単位）
             time.sleep(INTERVAL_TIME)
     
             # 改ページ処理を抜ける
-            if page_counter == PAGE_MAX:
-                break
-        else:
-            continue
-        break
+        #     if page_counter == PAGE_MAX:
+        #         break
+        # else:
+        #     continue
+        # break
  
  
     # 閉じる
