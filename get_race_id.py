@@ -1,7 +1,6 @@
 import bs4
 import traceback
 import re
-import os
 import csv
 import time
 from selenium import webdriver

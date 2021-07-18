@@ -100,7 +100,7 @@ if __name__ == "__main__":
  
             # ページのソース取得
             source = get_source_from_page(driver, page)
- 
+
             # ソースからデータ抽出
             data = get_data_from_source(source)
  
