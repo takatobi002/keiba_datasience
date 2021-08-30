@@ -16,13 +16,14 @@ CHROMEDRIVER = "/home/inaho/Documents/chromedriver_linux64/chromedriver"
 # 改ページ（最大）
 PAGE_MAX = 1
 # 遷移間隔（秒）
-INTERVAL_TIME = 3
+INTERVAL_TIME = 10
+RETRIES = 5
 
 # CSVフォルダ
 READ_FOLDER = "data/race_id/"
 RIGHT_FOLDER = "data/race_result/"
 # 対象年度
-YEAR = "2008"
+YEAR = "2021"
 
 # ドライバー準備
 def get_driver():
@@ -37,23 +38,31 @@ def get_driver():
 
 # 対象ページのソース取得
 def get_source_from_page(driver, page):
-    try:
-        # ターゲット
-        driver.get(page)
-        # class="RaceList_NameBox"の要素が見つかるまで10秒は待つ
-        target_elem = WebDriverWait(driver, 10).until(
-            EC.visibility_of_element_located((By.CLASS_NAME, "RaceList_NameBox"))
-        )
- 
-        if target_elem:
-            page_source = driver.page_source
-            return page_source
+    i = 0
+    while i < RETRIES:
+        try:
+            # ターゲット
+            driver.get(page)
+            # class="RaceList_NameBox"の要素が見つかるまで10秒は待つ
+            target_elem = WebDriverWait(driver, 10).until(
+                EC.visibility_of_element_located((By.CLASS_NAME, "RaceList_NameBox"))
+            )
+    
+            if target_elem:
+                page_source = driver.page_source
+                return page_source
+            else:
+                return None
+    
+        except Exception:
+            i = i + 1
+            print("Timeout, Retrying... (%(i)s/%(max)s)" % {'i': i, 'max': RETRIES})
+            continue
+            # print("Exception\n" + traceback.format_exc())
+            # return None
+        
         else:
             return None
- 
-    except Exception:
-        print("Exception\n" + traceback.format_exc())
-        return None
  
 # ソースからスクレイピングする
 def get_data_from_source(src):
@@ -357,7 +366,6 @@ if __name__ == "__main__":
                 writer = csv.writer(f)
                 write_race = []
                 for k,v in data.items():
-                    # for i in range(4):
                     write_race.append([k,v])
                 writer.writerow(write_race)
             # print(write_race)
